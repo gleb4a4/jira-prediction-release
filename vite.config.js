@@ -6,7 +6,6 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: 'https://gleb4a4.github.io',
   plugins: [
     vue(),
     vueDevTools(),
@@ -18,7 +17,16 @@ export default defineConfig({
   },
   build: {
     outDir: 'docs',
-    assetsInlineLimit: 0
+    assetsInlineLimit: 0,
+    rollupOptions: {
+      output: {
+        // Всі файли (JS, CSS) збережуться поруч із index.html
+        assetFileNames: '[name].[ext]', // Для статичних ресурсів
+        chunkFileNames: '[name].js',   // Для зібраних JS-файлів
+        entryFileNames: '[name].js',  // Для основного JS (entrypoint)
+      },
+    },
+
   },
   publicPath: '/jira-prediction-releaset'
 })
