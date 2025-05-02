@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <h1>Прогнозирование релиза</h1>
+    <button @click="showModal">Описание приложения</button>
 
     <!-- Форма ввода данных -->
     <div class="inputs">
@@ -116,6 +117,7 @@
       </div>
     </div>
   </div>
+  <Readme v-if="isModalVisible" :isVisible="isModalVisible" @close="hideModal" />
 </template>
 
 <script>
@@ -123,11 +125,13 @@ import VueApexCharts from 'vue3-apexcharts';
 import SprintManager from "@/logic/sprintManager.js";
 import MonteCarloSimulation from "@/logic/monteCarloSimulation.js";
 import ChartOptionsFactory from "@/logic/factory/chartOptions.js";
-
+import Readme from "@/components/modals/Readme.vue";
 export default {
-  components: { VueApexCharts },
+  components: { VueApexCharts, Readme },
   data() {
     return {
+      isModalVisible: false,
+
       // Исходные данные
       initialWork: 265,
       currentWork: 281,
@@ -203,6 +207,12 @@ export default {
     }
   },
   methods: {
+    showModal() {
+      this.isModalVisible = true;
+    },
+    hideModal() {
+      this.isModalVisible = false;
+    },
     runSimulation() {
       // Создаем экземпляр менеджера спринтов
       const sprintManager = new SprintManager(
@@ -294,7 +304,7 @@ export default {
 h1 {
   text-align: center;
   margin-bottom: 30px;
-  color: #1E40AF;
+  color: #003aff;
   font-size: 2.2rem;
   font-weight: 700;
 }

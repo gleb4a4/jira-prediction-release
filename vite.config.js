@@ -3,20 +3,24 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import Markdown from 'vite-plugin-md';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: 'https://gleb4a4.github.io/jira-prediction-release',
+  // base: 'https://gleb4a4.github.io/jira-prediction-release',
   plugins: [
     vue(),
     vueDevTools(),
+    Markdown()
   ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  assetsInclude: ['*.md', '**/*.md'],
   build: {
+    assetsInclude: ['*.md', '**/*.md'],
     outDir: 'docs',
     assetsInlineLimit: 0,
     rollupOptions: {
