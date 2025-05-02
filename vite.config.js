@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: 'https://gleb4a4.github.io',
   plugins: [
     vue(),
     vueDevTools(),
@@ -19,5 +20,5 @@ export default defineConfig({
     outDir: 'docs',
     assetsInlineLimit: 0
   },
-  publicPath: '/jira-prediction-releaset/'
+  publicPath: '/jira-prediction-releaset'
 })
