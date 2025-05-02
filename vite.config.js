@@ -8,41 +8,40 @@ function inlineAssetsPlugin() {
     name: 'inline-assets-plugin',
     enforce: 'post',
     transformIndexHtml(html, { bundle }) {
-      // Знайдемо всі CSS файли та їх вміст
+      // CSS інлайнові стилі
       const cssFiles = Object.keys(bundle).filter(fileName =>
         fileName.endsWith('.css')
       )
       const inlineStyles = cssFiles.map(fileName => {
-        const cssCode = bundle[fileName]?.source || '' // Вміст CSS
-        // Перевірка, чи CSS код валідний
-        if (cssCode.trim().startsWith('<')) {
-          console.error(`Invalid CSS content detected: ${fileName}`)
+        const cssCode = bundle[fileName]?.source || '' // Отримуємо CSS
+        delete bundle[fileName] // Видаляємо CSS-файл із результату збірки
+        if (cssCode.includes('<')) {
+          console.error(`Invalid CSS detected in ${fileName}`) // У разі помилки
         }
-        delete bundle[fileName]
-        return `<style>${cssCode}</style>`
+        return `<style>${cssCode}</style>` // Додаємо CSS у <style>
       })
 
-      // Знайдемо всі JS файли та їх вміст
+      // JS інлайнові скрипти
       const jsFiles = Object.keys(bundle).filter(fileName =>
         fileName.endsWith('.js')
       )
       const inlineScripts = jsFiles.map(fileName => {
-        const jsCode = bundle[fileName]?.code || '' // Вміст JS
-        // Перевірка, чи JS код валідний
-        if (jsCode.trim().startsWith('<')) {
-          console.error(`Invalid JS content detected: ${fileName}`)
+        const jsCode = bundle[fileName]?.code || '' // Отримуємо JS
+        delete bundle[fileName] // Видаляємо JS-файл із результату збірки
+        if (jsCode.includes('<')) {
+          console.error(`Invalid JS detected in ${fileName}`) // У разі помилки
         }
-        delete bundle[fileName]
-        return `<script>${jsCode}</script>`
+        return `<script>${jsCode}</script>` // Додаємо JS у <script>
       })
 
-      // Генеруємо HTML з інлайн-ресурсами
+      // Інлайн CSS у <head>, JS перед </body>
       return html
         .replace('</head>', `${inlineStyles.join('\n')}</head>`)
         .replace('</body>', `${inlineScripts.join('\n')}</body>`)
     }
   }
 }
+
 
 
 
@@ -61,5 +60,6 @@ export default defineConfig({
   build: {
     outDir: 'docs',
     assetsInlineLimit: 0
-  }
+  },
+  publicPath: '/jira-prediction-releaset/'
 })
