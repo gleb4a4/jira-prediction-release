@@ -8,39 +8,42 @@ function inlineAssetsPlugin() {
     name: 'inline-assets-plugin',
     enforce: 'post',
     transformIndexHtml(html, { bundle }) {
-      // Знайшли всі CSS файли з пакету
+      // Знайдемо всі CSS файли та їх вміст
       const cssFiles = Object.keys(bundle).filter(fileName =>
         fileName.endsWith('.css')
       )
-      // Інлайн CSS
       const inlineStyles = cssFiles.map(fileName => {
-        const cssCode = bundle[fileName].source || '' // CSS код
-        // Видаляємо CSS файл з результату збірки
+        const cssCode = bundle[fileName]?.source || '' // Вміст CSS
+        // Перевірка, чи CSS код валідний
+        if (cssCode.trim().startsWith('<')) {
+          console.error(`Invalid CSS content detected: ${fileName}`)
+        }
         delete bundle[fileName]
-        // Вставляємо CSS як <style>...</style>
         return `<style>${cssCode}</style>`
       })
 
-      // Знайшли всі JS файли
+      // Знайдемо всі JS файли та їх вміст
       const jsFiles = Object.keys(bundle).filter(fileName =>
         fileName.endsWith('.js')
       )
-      // Інлайн JS
       const inlineScripts = jsFiles.map(fileName => {
-        const jsCode = bundle[fileName].code || '' // JS код
-        // Видаляємо JS файл з результату збірки
+        const jsCode = bundle[fileName]?.code || '' // Вміст JS
+        // Перевірка, чи JS код валідний
+        if (jsCode.trim().startsWith('<')) {
+          console.error(`Invalid JS content detected: ${fileName}`)
+        }
         delete bundle[fileName]
-        // Вставляємо JS як <script>...</script>
         return `<script>${jsCode}</script>`
       })
 
-      // Додаємо інлайн CSS у <head> і інлайн JS перед закриттям </body>
+      // Генеруємо HTML з інлайн-ресурсами
       return html
         .replace('</head>', `${inlineStyles.join('\n')}</head>`)
         .replace('</body>', `${inlineScripts.join('\n')}</body>`)
     }
   }
 }
+
 
 
 // https://vite.dev/config/
@@ -56,6 +59,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'docs'
+    outDir: 'docs',
+    assetsInlineLimit: 0
   }
 })
