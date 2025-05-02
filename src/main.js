@@ -7,7 +7,7 @@ import { marked } from 'marked';
 
 
 const app  = createApp(App)
-fetch('/README.md')
+fetch('https://gleb4a4.github.io/jira-prediction-release/README.md')
   .then((response) => {
     if (!response.ok) {
       throw new Error('Не вдалося завантажити README.md');
