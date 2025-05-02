@@ -41,6 +41,15 @@
         <span>Дата начала:</span>
         <input type="date" v-model="startDate">
       </label>
+      <label>
+        <span>Номер стартового спринта:</span>
+        <input v-model.number="startSprint" type="number" min="1" step="1">
+      </label>
+      <label>
+        <span>Максимальное количество спринтов:</span>
+        <input v-model.number="maxSprints" type="number" min="1" step="1">
+      </label>
+
       <button @click="runSimulation">
         <span>Рассчитать прогноз</span>
       </button>
@@ -133,6 +142,7 @@ export default {
       isModalVisible: false,
 
       // Исходные данные
+      startSprint: 1,
       initialWork: 265,
       currentWork: 281,
       meanVelocity: 56,
@@ -224,6 +234,9 @@ export default {
       // Рассчитываем даты спринтов
       this.sprintDates = sprintManager.calculateSprintDates(this.startDate);
 
+      // Смещение спринтов, если проект стартует с определенного спринта
+      const adjustedSprintCount = this.startSprint - 1; // учёт смещения
+
       // Обновляем категории на графиках
       this.probabilityChartOptions.xaxis.categories = Array.from(
         {length: this.maxSprints},
@@ -242,22 +255,26 @@ export default {
         stdVelocity: this.stdVelocity,
         meanAddvity: this.meanAddvity,
         stdAddvity: this.stdAddvity,
-        maxSprints: this.maxSprints,
+        maxSprints: this.maxSprints - adjustedSprintCount,
         workingHoursPerDay: this.workingHoursPerDay
       };
 
       const simulation = new MonteCarloSimulation(simulationParams);
 
       // Запускаем симуляцию
-      const simulationResults = simulation.runSimulation(this.sprintDates);
+      const simulationResults = simulation.runSimulation(
+        this.sprintDates.slice(adjustedSprintCount), // корректируем даты
+        10000
+      );
+
 
       // Обновляем результаты
       this.results = simulationResults.results;
       this.cumulativeResults = simulationResults.cumulativeResults;
-      this.p10Sprint = simulationResults.p10Sprint;
-      this.medianSprint = simulationResults.medianSprint;
-      this.p90Sprint = simulationResults.p90Sprint;
-      this.mostProbableSprint = simulationResults.mostProbableSprint;
+      this.p10Sprint = simulationResults.p10Sprint + adjustedSprintCount;
+      this.medianSprint = simulationResults.medianSprint + adjustedSprintCount;
+      this.p90Sprint = simulationResults.p90Sprint + adjustedSprintCount;
+      this.mostProbableSprint = simulationResults.mostProbableSprint + adjustedSprintCount;
       this.unfinishedPercentage = simulationResults.unfinishedPercentage;
 
       // Рассчитываем данные для графика динамики
@@ -268,25 +285,22 @@ export default {
       this.p90Data = dynamicsData.p90Data;
 
       // Обновляем даты для прогнозов
-      this.updatePredictionDates();
+      this.updatePredictionDates(adjustedSprintCount);
     },
 
-    updatePredictionDates() {
-      // Создаем экземпляр менеджера спринтов для получения дат
+    updatePredictionDates(adjustedSprintCount = 0) {
       const sprintManager = new SprintManager(
         this.maxSprints,
         this.sprintLength,
         this.workingHoursPerDay
       );
 
-      // Устанавливаем даты спринтов в менеджере
-      sprintManager.sprintDates = this.sprintDates;
+      sprintManager.sprintDates = this.sprintDates.slice(adjustedSprintCount);
 
-      // Получаем даты для прогнозов
-      this.mostProbableDate = sprintManager.getSprintEndDate(this.mostProbableSprint);
-      this.medianDate = sprintManager.getSprintEndDate(this.medianSprint);
-      this.p10Date = sprintManager.getSprintEndDate(this.p10Sprint);
-      this.p90Date = sprintManager.getSprintEndDate(this.p90Sprint);
+      this.mostProbableDate = sprintManager.getSprintEndDate(this.mostProbableSprint - adjustedSprintCount);
+      this.medianDate = sprintManager.getSprintEndDate(this.medianSprint - adjustedSprintCount);
+      this.p10Date = sprintManager.getSprintEndDate(this.p10Sprint - adjustedSprintCount);
+      this.p90Date = sprintManager.getSprintEndDate(this.p90Sprint - adjustedSprintCount);
     }
   }
 }
