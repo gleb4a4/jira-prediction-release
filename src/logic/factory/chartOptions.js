@@ -218,6 +218,32 @@ class ChartOptionsFactory {
       }
     };
   }
+  
+  /**
+   * Создает настройки для графика залишок роботи по мірі завершення спринтів
+   * @returns {Object} настройки графика  залишок роботи по мірі завершення спринтів
+   */
+  static createBurnDownChartOptions() {
+    return {
+      chart: {
+        type: 'line',
+        toolbar: { show: false }
+      },
+      xaxis: {
+        title: { text: 'Спринти' },
+        categories: [] // Динамічно оновлюється з runSimulation
+      },
+      yaxis: {
+        title: { text: 'Залишок роботи (годин)' }
+      },
+      tooltip: {
+        x: { show: true }
+      },
+      colors: ['#DB4437'],
+      stroke: { curve: 'smooth', width: 2 }
+    };
+  }
+
 }
 
 export default ChartOptionsFactory

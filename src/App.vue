@@ -87,6 +87,15 @@
             :series="dynamicsSeries"
           />
         </div>
+        <div class="chart-container" style="grid-column: 1 / -1;">
+          <h3>Остаток работы</h3>
+          <VueApexCharts
+            type="line"
+            height="300"
+            :options="burnDownChartOptions"
+            :series="burnDownChartSeries"
+          />
+        </div>
       </div>
 
       <!-- Текстовые метрики -->
@@ -167,6 +176,7 @@ export default {
       medianDate: '',
       p10Date: '',
       p90Date: '',
+      burnDownChartSeries: [],
 
       // Настройки графиков
       probabilityChartOptions: ChartOptionsFactory.createProbabilityChartOptions(
@@ -175,7 +185,9 @@ export default {
       cumulativeChartOptions: ChartOptionsFactory.createCumulativeChartOptions(
         Array.from({length: 8}, (_, i) => `Спринт ${i+1}`)
       ),
-      dynamicsChartOptions: ChartOptionsFactory.createDynamicsChartOptions()
+      dynamicsChartOptions: ChartOptionsFactory.createDynamicsChartOptions(),
+      burnDownChartOptions: ChartOptionsFactory.createBurnDownChartOptions(),
+
     };
   },
   computed: {
@@ -279,11 +291,22 @@ export default {
       this.p10Data = dynamicsData.p10Data;
       this.p50Data = dynamicsData.p50Data;
       this.p90Data = dynamicsData.p90Data;
+      const burnDownData = this.calculateBurnDownData(
+        dynamicsData.dynamicsData
+      );
+      this.burnDownChartSeries = [
+        {
+          name: 'Залишок роботи',
+          data: burnDownData
+        }
+      ];
 
       // Обновляем даты для прогнозов
       this.updatePredictionDates(adjustedSprintCount);
     },
-
+    calculateBurnDownData(dynamicsData) {
+      return dynamicsData.map((value) => value > 0 ? value : 0);
+    },
     updatePredictionDates(adjustedSprintCount = 0) {
       const sprintManager = new SprintManager(
         this.maxSprints,
