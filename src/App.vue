@@ -42,10 +42,6 @@
         <input type="date" v-model="startDate">
       </label>
       <label>
-        <span>Номер стартового спринта:</span>
-        <input v-model.number="startSprint" type="number" min="1" step="1">
-      </label>
-      <label>
         <span>Максимальное количество спринтов:</span>
         <input v-model.number="maxSprints" type="number" min="1" step="1">
       </label>
